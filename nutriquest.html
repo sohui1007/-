@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영양왕 퀘스트 - 중3 가정 식품군 마스터</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+        }
+        .bg-pattern {
+            background-image: radial-gradient(#bbf7d0 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen text-slate-800 flex flex-col justify-between p-3 md:p-6">
+
+    <!-- Header -->
+    <header class="max-w-3xl mx-auto w-full bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-emerald-100 flex justify-between items-center mb-4">
+        <div class="flex items-center gap-2">
+            <span class="text-3xl">🥗</span>
+            <div>
+                <h1 class="text-base font-extrabold text-emerald-800 leading-none">영양왕 퀘스트</h1>
+                <p class="text-xs text-emerald-600 font-medium mt-1">중3 기술·가정 : 식품군과 식단</p>
+            </div>
+        </div>
+        
+        <div id="userInfoHeader" class="hidden flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+            <span id="displayStudentName" class="font-bold text-emerald-900 text-xs md:text-sm">학생</span>
+            <span id="currentStageBadge" class="bg-emerald-600 text-white text-[10px] md:text-xs px-2 py-0.5 rounded-full font-bold">1단계</span>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <main class="max-w-3xl mx-auto w-full flex-grow flex flex-col justify-center">
+        
+        <!-- SCREEN 0: Login / Welcome Screen -->
+        <section id="screenLogin" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-emerald-100 text-center max-w-md mx-auto w-full">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
+                🚴‍♂️
+            </div>
+            <h2 class="text-xl font-black text-slate-800 mb-2">식품구성자전거를 완성하라!</h2>
+            <p class="text-slate-600 text-xs md:text-sm mb-6 leading-relaxed">
+                각 단계는 <strong>하(3문)+중(4문)+상(3문) 총 10문제</strong>로 구성되어 있습니다.<br>
+                퀘스트를 완수하고 <strong class="text-emerald-600">영양왕 수료증</strong>을 획득하세요.
+            </p>
+            
+            <form onsubmit="event.preventDefault(); startApp();" class="space-y-4">
+                <div class="text-left">
+                    <label for="studentName" class="block text-xs font-bold text-slate-500 mb-1 ml-1">이름 (학번과 이름 입력)</label>
+                    <input type="text" id="studentName" required placeholder="예: 30101 홍길동" 
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 text-center text-base font-bold bg-slate-50">
+                </div>
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition active:scale-95 text-base">
+                    학습 시작하기 🚀
+                </button>
+            </form>
+        </section>
+
+        <!-- SCREEN 1: Dashboard Screen -->
+        <section id="screenDashboard" class="hidden space-y-4">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md">
+                <h2 class="text-xl font-extrabold mb-1">반가워요, <span id="dashName"></span> 학생! 👋</h2>
+                <p class="text-emerald-100 text-xs">각 단계별 10문제(하·중·상 통합)를 완수하고 영양왕 수료증을 획득해 보세요.</p>
+            </div>
+
+            <!-- Stages List -->
+            <div class="grid gap-3 md:grid-cols-3">
+                <!-- Stage 1 -->
+                <div id="cardStage1" class="bg-white rounded-2xl p-5 shadow-sm border-2 border-emerald-400 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-emerald-100 text-emerald-800 font-bold text-[11px] px-2 py-0.5 rounded-full">1단계</span>
+                            <span id="st1Status" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">진행 가능</span>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-800 mb-1">식품군 분류 마스터</h3>
+                        <p class="text-xs text-slate-500 mb-4">6가지 식품군별 대표 식품을 바르게 분류하기 (총 10문제)</p>
+                    </div>
+                    <button onclick="startStage(1)" id="btnStage1" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs transition">
+                        도전하기
+                    </button>
+                </div>
+
+                <!-- Stage 2 -->
+                <div id="cardStage2" class="bg-slate-50 rounded-2xl p-5 shadow-sm border-2 border-slate-200 opacity-60 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-slate-200 text-slate-600 font-bold text-[11px] px-2 py-0.5 rounded-full">2단계</span>
+                            <span id="st2Status" class="text-[11px] font-bold text-slate-400">🔒 잠김</span>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-800 mb-1">1인 1회 분량 맞추기</h3>
+                        <p class="text-xs text-slate-500 mb-4">식품군별 대표 식품의 1회 눈대중 분량 알아보기 (총 10문제)</p>
+                    </div>
+                    <button onclick="startStage(2)" id="btnStage2" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        1단계 완료 필요
+                    </button>
+                </div>
+
+                <!-- Stage 3 -->
+                <div id="cardStage3" class="bg-slate-50 rounded-2xl p-5 shadow-sm border-2 border-slate-200 opacity-60 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-slate-200 text-slate-600 font-bold text-[11px] px-2 py-0.5 rounded-full">3단계</span>
+                            <span id="st3Status" class="text-[11px] font-bold text-slate-400">🔒 잠김</span>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-800 mb-1">칼로리 & 권장 횟수</h3>
+                        <p class="text-xs text-slate-500 mb-4">식품군별 1회 칼로리 및 청소년 권장 섭취 횟수 (총 10문제)</p>
+                    </div>
+                    <button onclick="startStage(3)" id="btnStage3" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        2단계 완료 필요
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center pt-2">
+                <button onclick="showCertificate()" id="btnCertificate" class="hidden w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-3.5 rounded-2xl shadow-lg transition text-base">
+                    🏆 영양왕 수료증 출력하기 🏆
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: Quiz Screen -->
+        <section id="screenQuiz" class="hidden bg-white rounded-3xl p-5 md:p-7 shadow-xl border border-emerald-100 max-w-xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-3 text-xs font-bold text-slate-400 border-b pb-2">
+                <div class="flex items-center gap-2">
+                    <span id="quizStageTitle" class="text-emerald-600 font-bold">1단계: 식품군 분류</span>
+                    <span id="quizDiffBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">난이도: 하</span>
+                </div>
+                <span id="quizProgressNum" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">1 / 10</span>
+            </div>
+
+            <div id="quizStoryBox" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-start gap-2.5">
+                <span class="text-xl">💡</span>
+                <p id="quizStoryText" class="text-xs text-amber-900 font-medium leading-relaxed">
+                    상황 질문 내용
+                </p>
+            </div>
+
+            <div class="mb-5">
+                <h3 id="quizQuestion" class="text-sm md:text-base font-extrabold text-slate-800 leading-snug">
+                    질문 내용
+                </h3>
+            </div>
+
+            <div id="quizOptions" class="grid grid-cols-1 gap-2.5 mb-5">
+                <!-- Dynamic Options -->
+            </div>
+
+            <div id="quizFeedback" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-xs">
+                <div id="feedbackResult" class="font-bold text-emerald-800 mb-1">
+                    ✅ 정답입니다!
+                </div>
+                <p id="feedbackText" class="text-slate-600 leading-relaxed">
+                    해설 내용
+                </p>
+            </div>
+
+            <button id="btnNextQuestion" onclick="nextQuestion()" class="hidden w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow transition text-sm">
+                다음 문제로 →
+            </button>
+        </section>
+
+        <!-- SCREEN 3: Interactive Wrong Note Screen -->
+        <section id="screenWrongNote" class="hidden bg-white rounded-3xl p-5 md:p-7 shadow-xl border border-rose-100 max-w-xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-3 text-xs font-bold text-slate-400 border-b pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-rose-600 font-bold">✏️ 오답 집중 복습</span>
+                    <span id="wrongLoopBadge" class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded-full font-bold">1차 오답노트</span>
+                </div>
+                <span id="wrongProgressNum" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">1 / 1</span>
+            </div>
+
+            <div id="wrongStoryBox" class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-start gap-2.5">
+                <span class="text-xl">💡</span>
+                <p id="wrongStoryText" class="text-xs text-amber-900 font-medium leading-relaxed">
+                    상황 질문 내용
+                </p>
+            </div>
+
+            <div class="mb-5">
+                <h3 id="wrongQuestion" class="text-sm md:text-base font-extrabold text-slate-800 leading-snug">
+                    질문 내용
+                </h3>
+            </div>
+
+            <div id="wrongOptions" class="grid grid-cols-1 gap-2.5 mb-5">
+                <!-- Dynamic Options for Wrong Note -->
+            </div>
+
+            <div id="wrongFeedback" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 mb-4 text-xs">
+                <div id="wrongFeedbackResult" class="font-bold text-emerald-800 mb-1">
+                    ✅ 정답입니다!
+                </div>
+                <p id="wrongFeedbackText" class="text-slate-600 leading-relaxed">
+                    해설 내용
+                </p>
+            </div>
+
+            <button id="btnNextWrongQuestion" onclick="nextWrongQuestion()" class="hidden w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow transition text-sm">
+                다음 오답 문제로 →
+            </button>
+        </section>
+
+        <!-- SCREEN 4: Certificate Screen -->
+        <section id="screenCertificate" class="hidden bg-slate-900/60 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full border-4 border-amber-300 shadow-2xl text-center relative" id="certArea">
+                <div class="text-[10px] text-amber-600 font-bold tracking-widest uppercase mb-1">Certificate of Completion</div>
+                <h2 class="text-2xl font-black text-slate-900 mb-1">영양왕 완전학습 수료증</h2>
+                <div class="w-12 h-1 bg-amber-400 mx-auto mb-4 rounded-full"></div>
+
+                <p class="text-xs text-slate-600 mb-5 leading-relaxed">
+                    위 학생은 중학교 3학년 기술·가정<br>
+                    <strong class="text-slate-800">'식품군과 식단 작성'</strong> 과정을 성실히 수행하여<br>
+                    모든 단계를 완벽하게 마스터하였음을 증명합니다.
+                </p>
+
+                <div class="bg-amber-50 rounded-xl p-3.5 border border-amber-200 text-left space-y-1.5 mb-5 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">학생 이름:</span>
+                        <span id="certName" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">학습 영역:</span>
+                        <span class="font-bold text-slate-800">식품군 / 1회분량 / 권장횟수</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">완료 달성도:</span>
+                        <span class="font-bold text-emerald-600">100% (완전 학습)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">발급일:</span>
+                        <span id="certDate" class="font-bold text-slate-800">-</span>
+                    </div>
+                </div>
+
+                <div class="no-print flex gap-2 justify-center">
+                    <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition">
+                        🖨️ 인쇄 / PDF 저장
+                    </button>
+                    <button onclick="closeCertificate()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-4 rounded-xl text-xs transition">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-3 text-[11px] text-slate-400 no-print">
+        중학교 3학년 기술·가정 | 식품군 마스터 러닝 앱
+    </footer>
+
+    <script>
+        let studentName = "";
+        let currentStage = 1;
+        let userProgress = { stage1Cleared: false, stage2Cleared: false, stage3Cleared: false };
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let wrongQuestions = [];
+        let wrongReviewList = [];       // List of questions to review in current wrong note loop
+        let wrongReviewIndex = 0;      // Index of current wrong question being reviewed
+        let nextWrongQueue = [];        // Collects questions answered wrong DURING wrong note review
+        let wrongLoopCount = 1;         // Tracks review attempt iteration (1st review, 2nd review...)
+
+        // Integrated Question Bank: Exactly 10 questions per stage (3 Easy '하', 4 Medium '중', 3 Hard '상')
+        const qBank = {
+            1: [ // 1단계: 식품군 분류 마스터 (하3 + 중4 + 상3 = 10문)
+                { diff: "하", s: "주호는 아침으로 쌀밥, 계란말이, 오이무침을 먹었습니다.", q: "다음 중 '곡류'에 속하는 식품은?", o: ["쌀밥", "오이무침", "계란말이", "사과"], a: 0, e: "쌀밥, 식빵, 국수, 떡, 고구마 등은 탄수화물 원천인 곡류입니다." },
+                { diff: "하", s: "민지가 점심에 시금치나물과 오이무침을 먹었습니다.", q: "'채소류'에 속하는 식품 짝은?", o: ["시금치, 오이", "사과, 배", "닭고기, 두부", "우유, 치즈"], a: 0, e: "시금치, 오이, 당근, 무 등은 비타민과 무기질이 풍부한 채소류입니다." },
+                { diff: "하", s: "운동 후 단백질을 보충하려고 합니다.", q: "'고기·생선·달걀·콩류'가 아닌 것은?", o: ["돼지고기", "달걀", "두부", "감자"], a: 3, e: "감자는 탄수화물 함량이 높아 '곡류'로 분류됩니다." },
+                { diff: "중", s: "재석이는 식빵에 버터를 발라 먹었습니다.", q: "버터가 속한 식품군과 주요 영양소는?", o: ["유지·당류 - 지방", "우유·유제품류 - 칼슘", "고기류 - 단백질", "곡류 - 탄수화물"], a: 0, e: "버터는 우유 지방으로 만든 '유지·당류(지방)'입니다." },
+                { diff: "중", s: "자전거 뒷바퀴는 6가지 식품군을 나타냅니다.", q: "자전거 '앞바퀴'가 상징하는 것은?", o: ["수분 섭취와 적절한 운동", "영양소 칼로리", "식품의 가격", "식사 시간"], a: 0, e: "앞바퀴는 건강을 위한 수분 섭취와 운동의 중요성을 상징합니다." },
+                { diff: "중", s: "미역국에 들어가는 미역과 다시마입니다.", q: "해조류(미역, 김)는 어느 식품군일까요?", o: ["채소류", "과일류", "고기류", "곡류"], a: 0, e: "무기질과 식이섬유가 풍부한 해조류는 채소류에 포함됩니다." },
+                { diff: "중", s: "드레싱으로 쓰는 마요네즈와 올리브유는?", q: "어느 식품군에 속할까요?", o: ["유지·당류", "우유·유제품류", "채소류", "과일류"], a: 0, e: "기름 성분의 마요네즈와 올리브유는 '유지·당류'입니다." },
+                { diff: "상", s: "가: 두유, 나: 햄, 다: 치즈", q: "가, 나, 다의 올바른 식품군 분류는?", o: ["가: 고기생선콩류 / 나: 고기생선콩류 / 다: 우유유제품류", "가: 우유유제품류 / 나: 고기생선콩류 / 다: 우유유제품류", "가: 우유유제품류 / 나: 유지당류 / 다: 우유유제품류", "가: 고기생선콩류 / 나: 유지당류 / 다: 채소류"], a: 0, e: "두유(콩)와 햄(육류)은 고기·생선·달걀·콩류, 치즈는 우유·유제품류입니다." },
+                { diff: "상", s: "점심 식단: 제육덮밥(밥+돼지고기), 콩나물국, 깍두기, 요구르트", q: "이 식단에서 빠진 식품군은?", o: ["과일류", "곡류", "채소류", "우유·유제품류"], a: 0, e: "밥(곡), 돼지고기(고기생선콩), 콩나물/무(채소), 요구르트(유제품)가 있고 과일류가 없습니다." },
+                { diff: "상", s: "피자 재료: 도우(밀가루), 치즈, 방울토마토, 불고기", q: "포함된 식품군의 개수는 총 몇 개일까요?", o: ["4개 (곡, 유제품, 과일/채소, 고기)", "2개", "3개", "5개"], a: 0, e: "밀가루(곡), 치즈(유제품), 토마토(과일/채소), 불고기(고기생선콩) 총 4개입니다." }
+            ],
+            2: [ // 2단계: 1인 1회 분량 맞추기 (하3 + 중4 + 상3 = 10문)
+                { diff: "하", s: "식품군별 1인 1회 분량 기준을 알아봅니다.", q: "쌀밥 1공기(약 210g)의 곡류 1회 분량 기준은?", o: ["1회 분량", "2회 분량", "0.5회 분량", "3회 분량"], a: 0, e: "쌀밥 1공기(210g)가 곡류 1인 1회 분량의 표준 기준입니다." },
+                { diff: "하", s: "우유를 마시려고 합니다.", q: "우유 1인 1회 분량 기준 용량은?", o: ["200 mL (1컵/1팩)", "500 mL", "100 mL", "1000 mL"], a: 0, e: "우유 1컵 또는 1팩(약 200mL)이 1회 분량입니다." },
+                { diff: "하", s: "사과를 깎아 먹으려고 합니다.", q: "사과의 과일류 1인 1회 분량 기준은?", o: ["중간 크기 반 개 (약 100g)", "사과 3개", "사과 1상자", "사과 1/8 조각"], a: 0, e: "사과는 중간 크기 약 반 개(100g)가 1회 분량입니다." },
+                { diff: "중", s: "닭가슴살 샐러드를 준비합니다.", q: "육류(돼지, 소, 닭)의 1회 분량 기준은?", o: ["약 60g (탁구공 1.5개 크기)", "200g (큰 1덩이)", "10g", "500g"], a: 0, e: "육류 1회 분량 표준 기준은 약 60g입니다." },
+                { diff: "중", s: "상추쌈을 싸서 먹습니다.", q: "상추 등 잎채소의 1회 분량 적절 장수는?", o: ["약 6~7장 (약 70g)", "상추 1장", "상추 50장", "상추 100장"], a: 0, e: "상추 약 6~7장(약 70g)이 채소류 1회 분량 기준입니다." },
+                { diff: "중", s: "돼지고기 삼겹살 180g을 먹었습니다.", q: "고기류 1회 분량을 총 몇 회 먹은 것일까요?", o: ["3회 분량 (60g x 3)", "1회 분량", "10회 분량", "0.5회 분량"], a: 0, e: "육류 1회 분량이 60g이므로 180g은 3회 분량입니다." },
+                { diff: "중", s: "감자를 깎아서 조림을 만듭니다.", q: "감자의 곡류 1회 분량 개수는?", o: ["중간 크기 1개 (약 130g)", "감자 5개", "감자 10개", "감자 1/10개"], a: 0, e: "감자는 중간 크기 1개(약 130g)가 곡류 1회 분량입니다." },
+                { diff: "상", s: "지은이 식단: 아침 우유 200mL, 점심 치즈 1장, 저녁 우유 200mL", q: "오늘 섭취한 우유·유제품류의 총 1회 분량 횟수는?", o: ["3회 분량", "2회 분량", "1회 분량", "5회 분량"], a: 0, e: "우유 1회 + 치즈 1회 + 우유 1회 = 총 3회 분량입니다." },
+                { diff: "상", s: "인절미 떡 6개(약 140g)를 먹었습니다.", q: "이는 쌀밥 몇 공기 분량에 해당할까요?", o: ["약 2공기 (인절미 3개 = 1회 분량)", "약 10공기", "약 0.1공기", "약 5공기"], a: 0, e: "인절미 약 3개(70g)가 1회 분량(밥 1공기)이므로 6개는 약 2공기 분량입니다." },
+                { diff: "상", s: "과일 섭취: 점심 사과 반 개 + 간식 귤 1개", q: "오늘 먹은 과일류 총 횟수는?", o: ["2회 분량", "1회 분량", "5회 분량", "0.5회 분량"], a: 0, e: "사과 반 개(1회) + 귤 1개(1회) = 총 2회 분량입니다." }
+            ],
+            3: [ // 3단계: 칼로리 & 권장 횟수 (하3 + 중4 + 상3 = 10문)
+                { diff: "하", s: "식품군별 1회 분량당 기준 칼로리가 있습니다.", q: "곡류 1회 분량(밥 1공기)의 기준 칼로리는?", o: ["약 300 kcal", "약 50 kcal", "약 1000 kcal", "약 10 kcal"], a: 0, e: "곡류 1회 분량(밥 210g 기준)은 약 300kcal 기준입니다." },
+                { diff: "하", s: "우유 1컵(200mL)을 마시려고 합니다.", q: "우유 1회 분량의 기준 칼로리는?", o: ["약 125 kcal", "약 500 kcal", "약 10 kcal", "약 800 kcal"], a: 0, e: "우유 1컵(200mL) 1회 분량은 약 125kcal입니다." },
+                { diff: "하", s: "청소년(12-18세) 우유·유제품류 하루 권장 횟수는?", q: "성장기 청소년의 매일 권장 섭취 횟수는?", o: ["매일 2 회", "매일 10 회", "일주일에 1회", "0 회"], a: 0, e: "성장기 청소년은 뼈 건강(칼슘)을 위해 매일 2회 권장됩니다." },
+                { diff: "중", s: "아침 밥 1공기, 점심 밥 1공기, 저녁 식빵 1쪽을 먹었습니다.", q: "오늘 곡류로 섭취한 총 열량은? (1회 = 300kcal)", o: ["900 kcal (3회 x 300)", "300 kcal", "1500 kcal", "100 kcal"], a: 0, e: "곡류 3회 분량 = 3 x 300 = 900kcal 입니다." },
+                { diff: "중", s: "오늘 채소류를 매끼 2접시씩 총 6접시 먹었습니다.", q: "채소류 6회 분량의 총 칼로리는? (1회 = 15kcal)", o: ["90 kcal (6 x 15)", "300 kcal", "600 kcal", "15 kcal"], a: 0, e: "15kcal x 6회 = 90kcal로 열량이 매우 적습니다." },
+                { diff: "중", s: "간식: 사과 반 개(1회) + 우유 1컵(1회)", q: "이 간식의 총 칼로리는? (사과 50 + 우유 125)", o: ["175 kcal", "500 kcal", "300 kcal", "50 kcal"], a: 0, e: "50 + 125 = 175kcal 입니다." },
+                { diff: "중", s: "식단: 쌀밥 1공기(300) + 계란 1개(100) + 나물 1접시(15)", q: "이 식사의 총 칼로리는?", o: ["415 kcal", "600 kcal", "300 kcal", "200 kcal"], a: 0, e: "300 + 100 + 15 = 415kcal 입니다." },
+                { diff: "상", s: "철수의 하루 섭취: 곡류 3회, 고기류 4회, 채소류 5회, 과일류 1회, 우유류 2회", q: "총 섭취 칼로리는? (곡300, 고100, 채15, 과50, 우125)", o: ["1,675 kcal", "2,500 kcal", "1,000 kcal", "3,200 kcal"], a: 0, e: "(3x300) + (4x100) + (5x15) + (1x50) + (2x125) = 1,675 kcal 입니다." },
+                { diff: "상", s: "단백질 식품 1회(100kcal)와 곡류 1회(300kcal)의 비율은?", q: "곡류 칼로리는 단백질 식품의 몇 배인가요?", o: ["3배", "1배", "10배", "0.5배"], a: 0, e: "300kcal / 100kcal = 3배 입니다." },
+                { diff: "상", s: "아침: 식빵 1쪽 + 계란 1개 + 우유 1컵", q: "총 칼로리는? (식빵 300 + 계란 100 + 우유 125)", o: ["525 kcal", "200 kcal", "900 kcal", "1000 kcal"], a: 0, e: "300 + 100 + 125 = 525kcal 입니다." }
+            ]
+        };
+
+        function startApp() {
+            const input = document.getElementById('studentName').value.trim();
+            if(!input) return;
+            studentName = input;
+            document.getElementById('displayStudentName').innerText = studentName;
+            document.getElementById('dashName').innerText = studentName;
+            document.getElementById('userInfoHeader').classList.remove('hidden');
+            showDashboard();
+        }
+
+        function showDashboard() {
+            hideScreens();
+            document.getElementById('screenDashboard').classList.remove('hidden');
+            updateDashboardUI();
+        }
+
+        function updateDashboardUI() {
+            if (userProgress.stage1Cleared) {
+                unlockCard('cardStage2', 'btnStage2', 'st2Status');
+            }
+            if (userProgress.stage2Cleared) {
+                unlockCard('cardStage3', 'btnStage3', 'st3Status');
+            }
+            if (userProgress.stage1Cleared && userProgress.stage2Cleared && userProgress.stage3Cleared) {
+                document.getElementById('btnCertificate').classList.remove('hidden');
+            }
+        }
+
+        function unlockCard(cardId, btnId, statusId) {
+            const card = document.getElementById(cardId);
+            const btn = document.getElementById(btnId);
+            const status = document.getElementById(statusId);
+            
+            card.classList.remove('opacity-60', 'bg-slate-50');
+            card.classList.add('bg-white', 'border-emerald-400');
+            btn.disabled = false;
+            btn.classList.remove('bg-slate-300', 'text-slate-500', 'cursor-not-allowed');
+            btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'text-white');
+            btn.innerText = "도전하기";
+            status.innerText = "진행 가능";
+            status.className = "text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded";
+        }
+
+        function startStage(stageNum) {
+            currentStage = stageNum;
+            currentQuestions = [...qBank[currentStage]];
+            currentQuestionIndex = 0;
+            wrongQuestions = [];
+            const stageTitles = ["", "1단계: 식품군 분류", "2단계: 1회 분량", "3단계: 칼로리 & 권장횟수"];
+            document.getElementById('quizStageTitle').innerText = stageTitles[stageNum];
+            document.getElementById('currentStageBadge').innerText = `${stageNum}단계`;
+            
+            hideScreens();
+            document.getElementById('screenQuiz').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = currentQuestions[currentQuestionIndex];
+            document.getElementById('quizDiffBadge').innerText = `난이도: ${qData.diff}`;
+            document.getElementById('quizProgressNum').innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+            document.getElementById('quizStoryText').innerText = qData.s;
+            document.getElementById('quizQuestion').innerText = qData.q;
+
+            const optsDiv = document.getElementById('quizOptions');
+            optsDiv.innerHTML = '';
+            document.getElementById('quizFeedback').classList.add('hidden');
+            document.getElementById('btnNextQuestion').classList.add('hidden');
+
+            qData.o.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/40 text-left text-xs font-semibold text-slate-700 transition flex items-center gap-2.5 opt-btn";
+                btn.onclick = () => checkAnswer(idx);
+                btn.innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold">${idx + 1}</span><span>${opt}</span>`;
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx) {
+            const qData = currentQuestions[currentQuestionIndex];
+            const isCorrect = (selectedIdx === qData.a);
+
+            document.querySelectorAll('.opt-btn').forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === qData.a) {
+                    btn.classList.add('border-emerald-500', 'bg-emerald-100', 'text-emerald-900');
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.classList.add('border-rose-400', 'bg-rose-100', 'text-rose-900');
+                }
+            });
+
+            const fbBox = document.getElementById('quizFeedback');
+            const fbRes = document.getElementById('feedbackResult');
+            const fbText = document.getElementById('feedbackText');
+
+            fbBox.classList.remove('hidden');
+            if (isCorrect) {
+                fbRes.innerText = "✅ 정답입니다!";
+                fbRes.className = "font-bold text-emerald-800 mb-0.5 text-xs";
+            } else {
+                fbRes.innerText = "❌ 오답입니다! (오답노트에 수록됩니다)";
+                fbRes.className = "font-bold text-rose-700 mb-0.5 text-xs";
+                wrongQuestions.push(qData);
+            }
+            fbText.innerText = qData.e;
+            document.getElementById('btnNextQuestion').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                renderQuestion();
+            } else {
+                if (wrongQuestions.length === 0) {
+                    completeStage();
+                } else {
+                    initWrongNoteLoop(wrongQuestions);
+                }
+            }
+        }
+
+        function initWrongNoteLoop(listToReview) {
+            wrongReviewList = [...listToReview];
+            wrongReviewIndex = 0;
+            nextWrongQueue = [];
+            wrongLoopCount = (wrongLoopCount || 0) + 1;
+            
+            hideScreens();
+            document.getElementById('screenWrongNote').classList.remove('hidden');
+            renderWrongQuestion();
+        }
+
+        function renderWrongQuestion() {
+            const qData = wrongReviewList[wrongReviewIndex];
+            document.getElementById('wrongLoopBadge').innerText = `${wrongLoopCount - 1}차 오답노트`;
+            document.getElementById('wrongProgressNum').innerText = `${wrongReviewIndex + 1} / ${wrongReviewList.length}`;
+            document.getElementById('wrongStoryText').innerText = qData.s;
+            document.getElementById('wrongQuestion').innerText = qData.q;
+
+            const optsDiv = document.getElementById('wrongOptions');
+            optsDiv.innerHTML = '';
+            document.getElementById('wrongFeedback').classList.add('hidden');
+            document.getElementById('btnNextWrongQuestion').classList.add('hidden');
+
+            qData.o.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/40 text-left text-xs font-semibold text-slate-700 transition flex items-center gap-2.5 w-opt-btn";
+                btn.onclick = () => checkWrongAnswer(idx);
+                btn.innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold">${idx + 1}</span><span>${opt}</span>`;
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function checkWrongAnswer(selectedIdx) {
+            const qData = wrongReviewList[wrongReviewIndex];
+            const isCorrect = (selectedIdx === qData.a);
+
+            document.querySelectorAll('.w-opt-btn').forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === qData.a) {
+                    btn.classList.add('border-emerald-500', 'bg-emerald-100', 'text-emerald-900');
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.classList.add('border-rose-400', 'bg-rose-100', 'text-rose-900');
+                }
+            });
+
+            const fbBox = document.getElementById('wrongFeedback');
+            const fbRes = document.getElementById('wrongFeedbackResult');
+            const fbText = document.getElementById('wrongFeedbackText');
+
+            fbBox.classList.remove('hidden');
+            if (isCorrect) {
+                fbRes.innerText = "🎉 정답입니다! 개념을 확실히 이해하셨네요.";
+                fbRes.className = "font-bold text-emerald-800 mb-0.5 text-xs";
+            } else {
+                fbRes.innerText = "❌ 또 틀렸습니다! (다음 오답노트 루프에 다시 추가됩니다)";
+                fbRes.className = "font-bold text-rose-700 mb-0.5 text-xs";
+                nextWrongQueue.push(qData);
+            }
+            fbText.innerText = qData.e;
+            document.getElementById('btnNextWrongQuestion').classList.remove('hidden');
+        }
+
+        function nextWrongQuestion() {
+            wrongReviewIndex++;
+            if (wrongReviewIndex < wrongReviewList.length) {
+                renderWrongQuestion();
+            } else {
+                if (nextWrongQueue.length > 0) {
+                    alert(`아직 틀린 문제(${nextWrongQueue.length}개)가 남아있어 오답노트를 다시 진행합니다.`);
+                    initWrongNoteLoop(nextWrongQueue);
+                } else {
+                    alert("모든 오답을 완벽하게 재학습했습니다! 👏");
+                    wrongLoopCount = 1;
+                    completeStage();
+                }
+            }
+        }
+
+        function completeStage() {
+            if (currentStage === 1) userProgress.stage1Cleared = true;
+            if (currentStage === 2) userProgress.stage2Cleared = true;
+            if (currentStage === 3) userProgress.stage3Cleared = true;
+            alert(`${currentStage}단계를 성공적으로 완료하였습니다! 👏`);
+            showDashboard();
+        }
+
+        function showCertificate() {
+            const now = new Date();
+            document.getElementById('certName').innerText = studentName;
+            document.getElementById('certDate').innerText = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
+            document.getElementById('screenCertificate').classList.remove('hidden');
+        }
+
+        function closeCertificate() {
+            document.getElementById('screenCertificate').classList.add('hidden');
+        }
+
+        function hideScreens() {
+            ['screenLogin', 'screenDashboard', 'screenQuiz', 'screenWrongNote', 'screenCertificate'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
